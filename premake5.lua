@@ -3,19 +3,16 @@ workspace "OpenGL-from-scratch"
 
   platforms
   {
-    "Win32",
     "Win64"
   }
   startproject "OpenGL-from-scratch"
   outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
-  filter { "platforms:Win32" }
-    system "Windows"
-    architecture "x86"
 
   filter { "platforms:Win64" }
     system "Windows"
     architecture "x86_64"
+
 
   project "OpenGL-from-scratch"
     kind "ConsoleApp"
@@ -39,15 +36,24 @@ workspace "OpenGL-from-scratch"
 
     includedirs
     {
-      "src"
+      "src",
+      "ext/glfw/include",
+      "ext/glad/include"
+    }
+
+    links
+    {
+      "GLFW",
+      "GLAD"
     }
 
     filter "configurations:Debug"
-      defines "DISANA_DEBUG"
       runtime "Debug"
       symbols "on"
 
     filter "configurations:Release"
-      defines "DISANA_RELEASE"
       runtime "Release"
       optimize "on"
+
+include "ext/glfw.lua"
+include "ext/glad.lua"
