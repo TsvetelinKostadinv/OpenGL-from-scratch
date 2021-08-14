@@ -1,0 +1,9 @@
+# Builds and intermediate files
+/bin/
+/bin-int/
+
+# Visual Studio specific
+/.vs/
+*.sln
+*.vcxproj
+*.vcxproj.*
