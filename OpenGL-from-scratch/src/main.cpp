@@ -6,6 +6,7 @@
 
 #include "context.h"
 #include "gl_types.h"
+#include "util/vec.h"
 
 void processInput(GLFWwindow* window);
 
@@ -85,9 +86,9 @@ int main()
         return -1;
     }
 
-    float vertices[] = {-0.5f, -0.5f, 0.0f,  //
-                        0.5f,  -0.5f, 0.0f,  //
-                        0.0f,  0.5f,  0.0f};
+    vec3f vertices[] = {{-0.5f, -0.5f, 0.0f},  //
+                        {0.5f, -0.5f, 0.0f},   //
+                        {0.0f, 0.5f, 0.0f}};
     unsigned int VBO;
     unsigned int VAO;
     glGenBuffers(1, &VBO);
@@ -95,9 +96,11 @@ int main()
 
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices) * 3, vertices,
+                 GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, gl_type<float>::type, GL_FALSE, 3 * sizeof(float),
+    glVertexAttribPointer(0, sizeof(vertices) / sizeof(vec3f),
+                          gl_type<float>::type, GL_FALSE, sizeof(vec3f),
                           (void*) 0);
     glEnableVertexAttribArray(0);
 
@@ -113,7 +116,7 @@ int main()
 
         glBindVertexArray(VAO);
         glUseProgram(shaderProgram);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawArrays(GL_TRIANGLES, 0, sizeof(vertices) / sizeof(vec3f));
 
         glfwSwapBuffers(window);
         glfwPollEvents();
