@@ -1,10 +1,12 @@
-#include <glad/glad.h>
+#include "glad/glad.h"
 
-#include <GLFW/glfw3.h>
+#include "GLFW/glfw3.h"
 
 #include <iostream>
 
-void resizeCallback(GLFWwindow* window, int width, int height);
+#include "context.h"
+#include "gl_types.h"
+
 void processInput(GLFWwindow* window);
 
 const unsigned int WINDOW_WIDTH = 800;
@@ -29,32 +31,10 @@ const char* fragmentShaderSource =
 
 int main()
 {
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-#ifdef __APPLE__
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
+    context context(std::cerr);
 
     GLFWwindow* window =
-        glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_NAME, NULL, NULL);
-    if (window == NULL)
-    {
-        std::cout << "Failed to create GLFW window" << std::endl;
-        glfwTerminate();
-        return -1;
-    }
-    glfwMakeContextCurrent(window);
-    glfwSetFramebufferSizeCallback(window, resizeCallback);
-
-    if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress))
-    {
-        std::cout << "Failed to initialize GLAD" << std::endl;
-        glfwTerminate();
-        return -1;
-    }
+        context.createWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_NAME);
 
     unsigned int vertexShader;
     vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -117,7 +97,7 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
+    glVertexAttribPointer(0, 3, gl_type<float>::type, GL_FALSE, 3 * sizeof(float),
                           (void*) 0);
     glEnableVertexAttribArray(0);
 
@@ -142,7 +122,8 @@ int main()
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
-    glfwTerminate();
+    glfwDestroyWindow(window);
+
     return 0;
 }
 
@@ -150,9 +131,4 @@ void processInput(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
-}
-
-void resizeCallback(GLFWwindow* window, int width, int height)
-{
-    glViewport(0, 0, width, height);
 }
