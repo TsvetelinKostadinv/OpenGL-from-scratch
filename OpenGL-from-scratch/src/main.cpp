@@ -10,9 +10,9 @@
 
 void processInput(GLFWwindow* window);
 
-const unsigned int WINDOW_WIDTH = 800;
-const unsigned int WINDOW_HEIGHT = 600;
-const char* WINDOW_NAME = "OpenGL-from-scratch";
+constexpr unsigned int WINDOW_WIDTH = 800;
+constexpr unsigned int WINDOW_HEIGHT = 600;
+constexpr char* WINDOW_NAME = "OpenGL-from-scratch";
 
 const char* vertexShaderSource =
     "#version 330 core\n"
