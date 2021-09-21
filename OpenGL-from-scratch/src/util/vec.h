@@ -5,6 +5,8 @@
 
 struct vec3f
 {
+    // this is for the use of unnamed struct in a union which is not standard
+#pragma warning(disable : 4201)
     union
     {
         float f[3];
@@ -13,6 +15,7 @@ struct vec3f
             float x, y, z;
         };
     };
+#pragma warning(default : 4201)
 
     constexpr explicit vec3f() noexcept : f{0, 0, 0} {}
     constexpr explicit vec3f(float val) noexcept : f{val, val, val} {}

@@ -6,6 +6,8 @@ project "OpenGL-from-scratch"
   targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
   objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
 
+  warnings "Extra"
+
   files
   {
     "src/**.h",
@@ -16,6 +18,16 @@ project "OpenGL-from-scratch"
   defines
   {
     "_CRT_SECURE_NO_WARNINGS"
+  }
+
+  flags {
+    "FatalWarnings",
+    "MultiProcessorCompile",
+    "No64BitChecks",
+    "NoImplicitLink",
+    "NoImportLib",
+    "ShadowedVariables",
+    "OmitDefaultLibrary"
   }
 
   includedirs
@@ -38,3 +50,8 @@ project "OpenGL-from-scratch"
   filter "configurations:Release"
     runtime "Release"
     optimize "on"
+    flags
+    {
+      "LinkTimeOptimization",
+      "NoBufferSecurityCheck"
+    }
