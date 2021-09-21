@@ -7,6 +7,8 @@ project "OpenGL-from-scratch"
   objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
 
   warnings "Extra"
+  rtti "Off"
+  exceptionhandling "Off"
 
   files
   {
@@ -21,13 +23,12 @@ project "OpenGL-from-scratch"
   }
 
   flags {
-    "FatalWarnings",
+    "FatalCompileWarnings",
     "MultiProcessorCompile",
     "No64BitChecks",
     "NoImplicitLink",
     "NoImportLib",
-    "ShadowedVariables",
-    "OmitDefaultLibrary"
+    "ShadowedVariables"
   }
 
   includedirs

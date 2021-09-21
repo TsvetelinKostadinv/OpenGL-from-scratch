@@ -7,6 +7,7 @@
 #include "context.h"
 #include "gl_types.h"
 #include "util/vec.h"
+#include "visual_shader.h"
 
 void processInput(GLFWwindow* window);
 
@@ -37,54 +38,13 @@ int main()
     GLFWwindow* window =
         context.createWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_NAME);
 
-    unsigned int vertexShader;
-    vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    glCompileShader(vertexShader);
-
-    int success;
-    char infoLog[512];
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if (!success)
+    std::optional<visual_shader> optShader = visual_shader::makeShader(
+        std::cerr, vertexShaderSource, fragmentShaderSource);
+    if (!optShader.has_value())
     {
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        std::cout << "[ERROR] Vertex shader compilation failed:\n"
-                  << infoLog << std::endl;
-        glfwTerminate();
-        return -1;
+        return 1;
     }
-
-    unsigned int fragmentShader;
-    fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
-
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-        std::cout << "[ERROR] Fragment shader compilation failed:\n"
-                  << infoLog << std::endl;
-        glfwTerminate();
-        return -1;
-    }
-
-    unsigned int shaderProgram;
-    shaderProgram = glCreateProgram();
-
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if (!success)
-    {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-        std::cout << "[ERROR] Program linking failed:\n"
-                  << infoLog << std::endl;
-        glfwTerminate();
-        return -1;
-    }
+    const visual_shader shader = std::move(optShader).value();
 
     vec3f vertices[] = {{-0.5f, -0.5f, 0.0f},  //
                         {0.5f, -0.5f, 0.0f},   //
@@ -115,15 +75,13 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         glBindVertexArray(VAO);
-        glUseProgram(shaderProgram);
+        // glUseProgram(shaderProgram);
+        shader.useProgram();
         glDrawArrays(GL_TRIANGLES, 0, sizeof(vertices) / sizeof(vec3f));
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
 
     glfwDestroyWindow(window);
 
