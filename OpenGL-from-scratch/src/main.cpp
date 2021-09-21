@@ -67,6 +67,9 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
+    glBindVertexArray(VAO);
+    shader.useProgram();
+
     while (!glfwWindowShouldClose(window))
     {
         processInput(window);
@@ -74,8 +77,6 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glBindVertexArray(VAO);
-        shader.useProgram();
         glDrawArrays(GL_TRIANGLES, 0, sizeof(vertices) / sizeof(vec3f));
 
         glfwSwapBuffers(window);
@@ -90,5 +91,7 @@ int main()
 void processInput(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    {
         glfwSetWindowShouldClose(window, true);
+    }
 }
