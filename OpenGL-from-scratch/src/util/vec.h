@@ -1,4 +1,5 @@
 #pragma once
+#include <cassert>
 #include <cmath>
 #include "typedef.h"
 
@@ -68,6 +69,29 @@ struct vec3f
         y *= c;
         z *= c;
         return *this;
+    }
+
+    constexpr float operator[](i32 i) const noexcept
+    {
+        assert(i < 3 && "The index has to be in the range [0;3]");
+        return f[i];
+    }
+
+    constexpr float& operator[](i32 i) noexcept
+    {
+        assert(i < 3 && "The index has to be in the range [0;3]");
+        return f[i];
+    }
+
+    // mixed product, also the determinant of the matrix with these vectors as
+    // rows/columns
+    constexpr static float mixed(const vec3f& fst,
+                                 const vec3f& scd,
+                                 const vec3f& trd)
+    {
+        return fst[0] * scd[1] * trd[2] + fst[1] * scd[2] * trd[0] +
+               scd[0] * trd[1] * fst[2] - fst[2] * scd[1] * trd[0] -
+               fst[1] * scd[0] * trd[2] - scd[2] * trd[1] * fst[0];
     }
 };
 
