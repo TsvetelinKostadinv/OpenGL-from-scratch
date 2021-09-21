@@ -75,7 +75,6 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         glBindVertexArray(VAO);
-        // glUseProgram(shaderProgram);
         shader.useProgram();
         glDrawArrays(GL_TRIANGLES, 0, sizeof(vertices) / sizeof(vec3f));
 
