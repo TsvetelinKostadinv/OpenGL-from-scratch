@@ -30,12 +30,21 @@ int main()
     }
     const visual_shader shader = std::move(optShader).value();
 
-    vec3f vertices[] = {{-0.5f, -0.5f, 0.0f},  //
-                        {0.5f, -0.5f, 0.0f},   //
-                        {0.0f, 0.5f, 0.0f}};
+    float vertices[] = {
+        0.5f,  0.5f,  0.0f,  //
+        0.5f,  -0.5f, 0.0f,  //
+        -0.5f, -0.5f, 0.0f,  //
+        -0.5f, 0.5f,  0.0f   //
+    };
+    unsigned int indices[] = {
+        0, 1, 3,  // first triangle
+        1, 2, 3   // second triangle
+    };
     unsigned int VBO;
     unsigned int VAO;
+    unsigned int EBO;
     glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
     glGenVertexArrays(1, &VAO);
 
     glBindVertexArray(VAO);
@@ -43,16 +52,21 @@ int main()
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices) * 3, vertices,
                  GL_STATIC_DRAW);
 
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,
+                 GL_STATIC_DRAW);
+
     glVertexAttribPointer(0, sizeof(vertices) / sizeof(vec3f),
                           gl_type<float>::gl_variant, GL_FALSE, sizeof(vec3f),
                           (void*) 0);
     glEnableVertexAttribArray(0);
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-
     glBindVertexArray(VAO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     shader.useProgram();
+
+    float x, y, z;
+    x = y = z = 0.0f;
 
     while (!glfwWindowShouldClose(window))
     {
@@ -61,7 +75,13 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glDrawArrays(GL_TRIANGLES, 0, sizeof(vertices) / sizeof(vec3f));
+        x += 0.0001f;
+        y += 0.0002f;
+        z += 0.0003f;
+        shader.setUniform3f("color", x, y, z);
+        // glDrawArrays(GL_TRIANGLES, 0, sizeof(vertices) / sizeof(vec3f));
+        glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(unsigned int),
+                       GL_UNSIGNED_INT, (void*) 0);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

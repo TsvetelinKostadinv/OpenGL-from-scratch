@@ -5,9 +5,17 @@
 #include <fstream>
 #include <optional>
 #include <ostream>
+#include <unordered_map>
 
 #include "glad/glad.h"
 #include "util/typedef.h"
+
+// struct uniform
+//{
+//    const GLenum type;
+//
+//    virtual set
+//};
 
 class visual_shader
 {
@@ -156,12 +164,17 @@ public:
         : vertShaderId(other.vertShaderId),
           fragShaderId(other.fragShaderId),
           geomShaderId(other.geomShaderId),
-          programId(other.programId)
+          programId(other.programId),
+          activeAttributesCount(other.activeAttributesCount),
+          activeUniformsCount(other.activeUniformsCount),
+          uniformsCache(std::move(other.uniformsCache))
     {
         other.vertShaderId = 0;
         other.fragShaderId = 0;
         other.geomShaderId = 0;
         other.programId = 0;
+        other.activeAttributesCount = 0;
+        other.activeUniformsCount = 0;
     }
 
     ~visual_shader()
@@ -185,28 +198,42 @@ public:
         return inputType;
     }
 
-    unsigned int getActiveAttributesCount() const
-    {
-        int activeAttr;
-        glGetProgramiv(programId, GL_ACTIVE_ATTRIBUTES, &activeAttr);
-        return activeAttr;
-    }
+    int getActiveAttributesCount() const { return activeAttributesCount; }
+
+    int getActiveUniformsCount() const { return activeUniformsCount; }
 
     void useProgram() const { glUseProgram(programId); }
 
-    void asd()
+    void setUniform1f(const std::string& name, float val) const
     {
-        for (unsigned int i = 0; i < getActiveAttributesCount(); ++i)
-        {
-            constexpr int maxNameLen = 100;
-            int actualLen;
-            int attribSize;
-            GLenum attribType;
-            GLchar attribName[maxNameLen];
+        glUniform1f(uniformsCache.at(name), val);
+    }
 
-            glGetActiveAttrib(programId, i, maxNameLen, &actualLen, &attribSize,
-                              &attribType, attribName);
-        }
+    void setUniform2f(const std::string& name, float val1, float val2) const
+    {
+        glUniform2f(uniformsCache.at(name), val1, val2);
+    }
+
+    void setUniform3f(const std::string& name,
+                      float val1,
+                      float val2,
+                      float val3) const
+    {
+        glUniform3f(uniformsCache.at(name), val1, val2, val3);
+    }
+
+    void setUniform3f(const std::string& name, const vec3f& values) const
+    {
+        glUniform3f(uniformsCache.at(name), values.x, values.y, values.z);
+    }
+
+    void setUniform4f(const std::string& name,
+                      float val1,
+                      float val2,
+                      float val3,
+                      float val4) const
+    {
+        glUniform4f(uniformsCache.at(name), val1, val2, val3, val4);
     }
 
 public:
@@ -220,6 +247,21 @@ public:
           geomShaderId(geomShaderId),
           programId(programId)
     {
+        glGetProgramiv(programId, GL_ACTIVE_ATTRIBUTES, &activeAttributesCount);
+        glGetProgramiv(programId, GL_ACTIVE_UNIFORMS, &activeUniformsCount);
+
+        for (int i = 0; i < activeUniformsCount; i++)
+        {
+            constexpr u32 bufferSize = 128;
+            i32 length;
+            i32 size;
+            GLenum type;
+            char name[bufferSize];
+            glGetActiveUniform(programId, i, bufferSize, &length, &size, &type,
+                               name);
+
+            uniformsCache[name] = i;
+        }
     }
 
     template <class _Ty>
@@ -230,4 +272,9 @@ public:
     unsigned int fragShaderId;
     std::optional<unsigned int> geomShaderId;
     unsigned int programId;
+
+    int activeAttributesCount;
+    int activeUniformsCount;
+
+    std::unordered_map<std::string, i32> uniformsCache;
 };
