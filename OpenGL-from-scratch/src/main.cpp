@@ -15,31 +15,15 @@ constexpr unsigned int WINDOW_WIDTH = 800;
 constexpr unsigned int WINDOW_HEIGHT = 600;
 constexpr char* WINDOW_NAME = "OpenGL-from-scratch";
 
-const char* vertexShaderSource =
-    "#version 330 core\n"
-    "layout (location = 0) in vec3 inPos;\n"
-    "void main()\n"
-    "{\n"
-    "   gl_Position = vec4(inPos.x, inPos.y, inPos.z, 1.0);\n"
-    "}\0";
-
-const char* fragmentShaderSource =
-    "#version 330 core\n"
-    "out vec4 FragColor;\n"
-    "void main()\n"
-    "{\n"
-    "FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-    "}\0";
-
 int main()
 {
     context context(std::cerr);
 
     GLFWwindow* window =
         context.createWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_NAME);
-
-    std::optional<visual_shader> optShader = visual_shader::makeShader(
-        std::cerr, vertexShaderSource, fragmentShaderSource);
+    std::optional<visual_shader> optShader = visual_shader::makeShaderFromFiles(
+        std::cerr, "./resources/shaders/basic.vs",
+        "./resources/shaders/basic.fs", std::nullopt);
     if (!optShader.has_value())
     {
         return 1;
@@ -60,7 +44,7 @@ int main()
                  GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, sizeof(vertices) / sizeof(vec3f),
-                          gl_type<float>::type, GL_FALSE, sizeof(vec3f),
+                          gl_type<float>::gl_variant, GL_FALSE, sizeof(vec3f),
                           (void*) 0);
     glEnableVertexAttribArray(0);
 

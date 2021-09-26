@@ -1,6 +1,8 @@
 #pragma once
 
 #include <assert.h>
+#include <filesystem>
+#include <fstream>
 #include <optional>
 #include <ostream>
 
@@ -105,6 +107,51 @@ public:
         return res;
     }
 
+    static std::optional<visual_shader> makeShaderFromFiles(
+        std::ostream& errStream,
+        const std::filesystem::path vertexShaderSourcePath,
+        const std::filesystem::path fragShaderSourcePath,
+        std::optional<const std::filesystem::path> geomShaderSourcePath)
+    {
+        std::ifstream in(vertexShaderSourcePath);
+        std::string vertShaderSource;
+        in.seekg(0, std::ios::end);
+        vertShaderSource.reserve(in.tellg());
+        in.seekg(0, std::ios::beg);
+
+        vertShaderSource.assign((std::istreambuf_iterator<char>(in)),
+                                std::istreambuf_iterator<char>());
+
+        in.close();
+        in.open(fragShaderSourcePath);
+        std::string fragShaderSource;
+        in.seekg(0, std::ios::end);
+        fragShaderSource.reserve(in.tellg());
+        in.seekg(0, std::ios::beg);
+        fragShaderSource.assign((std::istreambuf_iterator<char>(in)),
+                                std::istreambuf_iterator<char>());
+
+        if (geomShaderSourcePath.has_value())
+        {
+            in.close();
+            in.open(geomShaderSourcePath.value());
+            std::string geomShaderSource;
+            in.seekg(0, std::ios::end);
+            geomShaderSource.reserve(in.tellg());
+            in.seekg(0, std::ios::beg);
+            geomShaderSource.assign((std::istreambuf_iterator<char>(in)),
+                                    std::istreambuf_iterator<char>());
+            return visual_shader::makeShader(
+                errStream, vertShaderSource.c_str(), fragShaderSource.c_str(),
+                geomShaderSource.c_str());
+        }
+        else
+        {
+            return visual_shader::makeShader(
+                errStream, vertShaderSource.c_str(), fragShaderSource.c_str());
+        }
+    }
+
     visual_shader(visual_shader&& other) noexcept
         : vertShaderId(other.vertShaderId),
           fragShaderId(other.fragShaderId),
@@ -138,14 +185,31 @@ public:
         return inputType;
     }
 
+    unsigned int getActiveAttributesCount() const
+    {
+        int activeAttr;
+        glGetProgramiv(programId, GL_ACTIVE_ATTRIBUTES, &activeAttr);
+        return activeAttr;
+    }
+
     void useProgram() const { glUseProgram(programId); }
 
-public:
-    unsigned int vertShaderId;
-    unsigned int fragShaderId;
-    std::optional<unsigned int> geomShaderId;
-    unsigned int programId;
+    void asd()
+    {
+        for (unsigned int i = 0; i < getActiveAttributesCount(); ++i)
+        {
+            constexpr int maxNameLen = 100;
+            int actualLen;
+            int attribSize;
+            GLenum attribType;
+            GLchar attribName[maxNameLen];
 
+            glGetActiveAttrib(programId, i, maxNameLen, &actualLen, &attribSize,
+                              &attribType, attribName);
+        }
+    }
+
+public:
     // does not perform any validation
     visual_shader(unsigned int vertShaderId,
                   unsigned int fragShaderId,
@@ -160,4 +224,10 @@ public:
 
     template <class _Ty>
     friend class std::optional;
+
+    // private:
+    unsigned int vertShaderId;
+    unsigned int fragShaderId;
+    std::optional<unsigned int> geomShaderId;
+    unsigned int programId;
 };
