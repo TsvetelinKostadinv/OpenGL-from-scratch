@@ -15,6 +15,8 @@ constexpr unsigned int WINDOW_WIDTH = 800;
 constexpr unsigned int WINDOW_HEIGHT = 600;
 constexpr char* WINDOW_NAME = "OpenGL-from-scratch";
 
+constexpr vec3f CLEAR_COLOR(0.2f, 0.3f, 0.3f);
+
 int main()
 {
     context context(std::cerr);
@@ -36,10 +38,12 @@ int main()
         -0.5f, -0.5f, 0.0f,  //
         -0.5f, 0.5f,  0.0f   //
     };
+
     unsigned int indices[] = {
         0, 1, 3,  // first triangle
         1, 2, 3   // second triangle
     };
+
     unsigned int VBO;
     unsigned int VAO;
     unsigned int EBO;
@@ -72,12 +76,15 @@ int main()
     {
         processInput(window);
 
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(CLEAR_COLOR.x, CLEAR_COLOR.y, CLEAR_COLOR.z, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        x += 0.0001f;
-        y += 0.0002f;
-        z += 0.0003f;
+        x += 0.0003f;
+        x -= x > 1.0f ? 1.0f : 0.0f;
+        y += 0.0005f;
+        y -= y > 1.0f ? 1.0f : 0.0f;
+        z += 0.0008f;
+        z -= z > 1.0f ? 1.0f : 0.0f;
         shader.setUniform3f("color", x, y, z);
         // glDrawArrays(GL_TRIANGLES, 0, sizeof(vertices) / sizeof(vec3f));
         glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(unsigned int),
