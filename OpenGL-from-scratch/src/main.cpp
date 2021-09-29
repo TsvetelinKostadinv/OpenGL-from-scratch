@@ -82,8 +82,8 @@ int main()
         glClearColor(CLEAR_COLOR.x, CLEAR_COLOR.y, CLEAR_COLOR.z, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(unsigned),
-                       GL_UNSIGNED_INT, (void*) 0);
+        glDrawElements(GL_TRIANGLES, vertArray.countToDraw(), GL_UNSIGNED_INT,
+                       (void*) 0);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
