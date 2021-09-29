@@ -4,6 +4,7 @@
 
 #include <iostream>
 
+#include "buffer/buffer.h"
 #include "context.h"
 #include "gl_types.h"
 #include "shader/visual_shader.h"
@@ -56,32 +57,23 @@ int main()
         1, 2, 3   // second triangle
     };
 
-    unsigned int VBO;
-    unsigned int VAO;
-    unsigned int EBO;
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-    glGenVertexArrays(1, &VAO);
+    gpu_buffer vertBuffer;
+    vertBuffer.loadData(GL_ARRAY_BUFFER, sizeof(vertices), vertices,
+                        GL_STATIC_DRAW);
 
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    layout layout;
+    layout.push<float>(3);  // position
+    layout.push<float>(3);  // color
 
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(0, 3, gl_type<float>::gl_variant, GL_FALSE,
-                          2 * sizeof(vec3f), (void*) 0);
-    glVertexAttribPointer(1, 3, gl_type<float>::gl_variant, GL_FALSE,
-                          2 * sizeof(vec3f), (void*) sizeof(vec3f));
+    gpu_buffer indBuffer;
+    indBuffer.loadData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,
+                       GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,
-                 GL_STATIC_DRAW);
-
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    vertex_array vertArray(vertBuffer, layout, &indBuffer);
     shader.useProgram();
+    vertArray.enable();
+
+    assert(shader.getActiveAttributesCount() == 2);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -90,9 +82,8 @@ int main()
         glClearColor(CLEAR_COLOR.x, CLEAR_COLOR.y, CLEAR_COLOR.z, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(unsigned int),
+        glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(unsigned),
                        GL_UNSIGNED_INT, (void*) 0);
-        assert(glGetError() == GL_NO_ERROR);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
