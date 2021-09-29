@@ -7,6 +7,7 @@
 
 #include "gl_types.h"
 #include "util/typedef.h"
+#include "util/vec.h"
 
 // Buffer is the storage of the data
 // Could be extended into buffer array
@@ -53,6 +54,15 @@ public:
         elements.emplace_back(layout_element{
             u32(elements.size()), size, gl_type<T>::gl_variant, normalized});
         stride += size * getSizeOfGLtype(gl_type<T>::gl_variant);
+    }
+
+    template <>
+    void push<vec3f>(u32 size, bool normalized)
+    {
+        for (u32 i = 0; i < size; ++i)
+        {
+            push<float>(3, normalized);
+        }
     }
 
 #pragma warning(disable : 4312)  // because of the const void* cast

@@ -62,8 +62,8 @@ int main()
                         GL_STATIC_DRAW);
 
     layout layout;
-    layout.push<float>(3);  // position
-    layout.push<float>(3);  // color
+    layout.push<vec3f>();  // position
+    layout.push<vec3f>();  // color
 
     gpu_buffer indBuffer;
     indBuffer.loadData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,
