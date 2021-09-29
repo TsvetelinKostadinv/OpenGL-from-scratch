@@ -6,8 +6,8 @@
 
 #include "context.h"
 #include "gl_types.h"
+#include "shader/visual_shader.h"
 #include "util/vec.h"
-#include "visual_shader.h"
 
 void processInput(GLFWwindow* window);
 
@@ -39,14 +39,16 @@ int main()
         {
             std::quick_exit(exit_codes::BAD_SHADERS);
         }
+        // forced to move before return, because we don't have a copy
+        // constructor
         return std::move(optShader).value();
     }();
 
     float vertices[] = {
-        0.5f,  0.5f,  0.0f,  //
-        0.5f,  -0.5f, 0.0f,  //
-        -0.5f, -0.5f, 0.0f,  //
-        -0.5f, 0.5f,  0.0f   //
+        0.5f,  0.5f,  0.0f, 1.0f, 0.0f, 0.0f,  //
+        0.5f,  -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,  //
+        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,  //
+        -0.5f, 0.5f,  0.0f, 1.0f, 1.0f, 1.0f,  //
     };
 
     unsigned int indices[] = {
@@ -63,24 +65,23 @@ int main()
 
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices) * 3, vertices,
-                 GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(0, 3, gl_type<float>::gl_variant, GL_FALSE,
+                          2 * sizeof(vec3f), (void*) 0);
+    glVertexAttribPointer(1, 3, gl_type<float>::gl_variant, GL_FALSE,
+                          2 * sizeof(vec3f), (void*) sizeof(vec3f));
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,
                  GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, sizeof(vertices) / sizeof(vec3f),
-                          gl_type<float>::gl_variant, GL_FALSE, sizeof(vec3f),
-                          (void*) 0);
-    glEnableVertexAttribArray(0);
-
     glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     shader.useProgram();
-
-    float x, y, z;
-    x = y = z = 0.0f;
 
     while (!glfwWindowShouldClose(window))
     {
@@ -89,16 +90,9 @@ int main()
         glClearColor(CLEAR_COLOR.x, CLEAR_COLOR.y, CLEAR_COLOR.z, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        x += 0.0003f;
-        x -= x > 1.0f;
-        y += 0.0005f;
-        y -= y > 1.0f;
-        z += 0.0008f;
-        z -= z > 1.0f;
-        shader.setUniform3f("color", x, y, z);
-        // glDrawArrays(GL_TRIANGLES, 0, sizeof(vertices) / sizeof(vec3f));
         glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(unsigned int),
                        GL_UNSIGNED_INT, (void*) 0);
+        assert(glGetError() == GL_NO_ERROR);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
