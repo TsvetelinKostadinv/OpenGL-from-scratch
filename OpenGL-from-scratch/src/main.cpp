@@ -17,20 +17,30 @@ constexpr char* WINDOW_NAME = "OpenGL-from-scratch";
 
 constexpr vec3f CLEAR_COLOR(0.2f, 0.3f, 0.3f);
 
+enum exit_codes
+{
+    BAD_SHADERS,
+};
+
 int main()
 {
     context context(std::cerr);
 
     GLFWwindow* window =
         context.createWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_NAME);
-    std::optional<visual_shader> optShader = visual_shader::makeShaderFromFiles(
-        std::cerr, "./resources/shaders/basic.vs",
-        "./resources/shaders/basic.fs", std::nullopt);
-    if (!optShader.has_value())
+
+    const visual_shader shader = []()
     {
-        return 1;
-    }
-    const visual_shader shader = std::move(optShader).value();
+        std::optional<visual_shader> optShader =
+            visual_shader::makeShaderFromFiles(
+                std::cerr, "./resources/shaders/basic.vs",
+                "./resources/shaders/basic.fs", std::nullopt);
+        if (!optShader.has_value())
+        {
+            std::quick_exit(exit_codes::BAD_SHADERS);
+        }
+        return std::move(optShader).value();
+    }();
 
     float vertices[] = {
         0.5f,  0.5f,  0.0f,  //
@@ -80,11 +90,11 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         x += 0.0003f;
-        x -= x > 1.0f ? 1.0f : 0.0f;
+        x -= x > 1.0f;
         y += 0.0005f;
-        y -= y > 1.0f ? 1.0f : 0.0f;
+        y -= y > 1.0f;
         z += 0.0008f;
-        z -= z > 1.0f ? 1.0f : 0.0f;
+        z -= z > 1.0f;
         shader.setUniform3f("color", x, y, z);
         // glDrawArrays(GL_TRIANGLES, 0, sizeof(vertices) / sizeof(vec3f));
         glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(unsigned int),
