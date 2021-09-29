@@ -15,7 +15,7 @@ class visual_shader
 {
 public:
     visual_shader(visual_shader&& other) noexcept;
-    visual_shader& operator=(visual_shader&& other);
+    visual_shader& operator=(visual_shader&& other) noexcept;
 
     visual_shader(const visual_shader&) = delete;
     visual_shader& operator=(const visual_shader&) = delete;

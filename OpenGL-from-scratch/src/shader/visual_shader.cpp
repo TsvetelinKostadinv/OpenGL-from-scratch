@@ -157,8 +157,9 @@ visual_shader::visual_shader(visual_shader&& other) noexcept
     other.activeUniformsCount = 0;
 }
 
-visual_shader& visual_shader::operator=(visual_shader&& other)
+visual_shader& visual_shader::operator=(visual_shader&& other) noexcept
 {
+    this->~visual_shader();
     vertShaderId = other.vertShaderId;
     fragShaderId = other.vertShaderId;
     if (other.geomShaderId.has_value())
