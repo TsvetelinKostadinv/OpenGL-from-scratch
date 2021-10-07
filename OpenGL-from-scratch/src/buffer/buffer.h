@@ -74,7 +74,7 @@ public:
             glEnableVertexAttribArray(el.index);
             glVertexAttribPointer(el.index, el.size, el.type,
                                   el.normalized ? GL_TRUE : GL_FALSE, stride,
-                                  (const void*) currentOffset);
+                                  reinterpret_cast<const void*>(currentOffset));
             currentOffset += el.size * getSizeOfGLtype(el.type);
         }
     }
