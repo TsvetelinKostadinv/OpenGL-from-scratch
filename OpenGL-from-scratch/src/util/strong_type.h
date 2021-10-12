@@ -8,7 +8,7 @@
 // link: https://www.youtube.com/watch?v=fWcnp7Bulc8
 
 template <typename Underlying, template <typename> typename Current>
-struct CRTP
+struct crtp
 {
     constexpr const Underlying& underlying() const
     {
@@ -18,7 +18,7 @@ struct CRTP
 
 // uses the predefined + operator of the strong type's base type
 template <typename Underlying>
-struct ForwardingAddable : CRTP<Underlying, ForwardingAddable>
+struct forwarding_addable : crtp<Underlying, forwarding_addable>
 {
     constexpr Underlying add(const Underlying& other) const
     {
@@ -42,14 +42,14 @@ struct strong_type
         typename = std::enable_if_t<std::is_default_constructible<T>::value>>
     constexpr explicit strong_type() noexcept(
         std::is_nothrow_default_constructible<T>::value)
-        : value()
+        : Decorators<strong_type<T, Identifier, Decorators...>>()..., value()
     {
     }
 
     template <typename = std::enable_if_t<std::is_copy_constructible<T>::value>>
     constexpr explicit strong_type(const T& value) noexcept(
         std::is_nothrow_copy_constructible<T>::value)
-        : value(value)
+        : value(value),
     {
     }
 
